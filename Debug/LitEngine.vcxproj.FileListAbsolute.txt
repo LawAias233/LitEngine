@@ -1,0 +1,2 @@
+D:\Code\ComputerGraphics\LitEngine\Debug\LitEngine.exe
+D:\Code\ComputerGraphics\LitEngine\Debug\LitEngine.pdb

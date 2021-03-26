@@ -1,0 +1,26 @@
+﻿  Rasterizer.cpp
+D:\Code\ComputerGraphics\LitEngine\Rasterizer.cpp(71,56): warning C4244: “=”: 从“_Ty”转换到“int”，可能丢失数据
+          with
+          [
+              _Ty=float
+          ]
+D:\Code\ComputerGraphics\LitEngine\Rasterizer.cpp(73,57): warning C4244: “=”: 从“_Ty”转换到“int”，可能丢失数据
+          with
+          [
+              _Ty=float
+          ]
+D:\Code\ComputerGraphics\LitEngine\Rasterizer.cpp(75,56): warning C4244: “=”: 从“_Ty”转换到“int”，可能丢失数据
+          with
+          [
+              _Ty=float
+          ]
+D:\Code\ComputerGraphics\LitEngine\Rasterizer.cpp(77,57): warning C4244: “=”: 从“_Ty”转换到“int”，可能丢失数据
+          with
+          [
+              _Ty=float
+          ]
+D:\Code\ComputerGraphics\LitEngine\Rasterizer.cpp(84,42): warning C4244: “参数”: 从“int”转换到“const float”，可能丢失数据
+D:\Code\ComputerGraphics\LitEngine\Rasterizer.cpp(84,39): warning C4244: “参数”: 从“int”转换到“const float”，可能丢失数据
+D:\Code\ComputerGraphics\LitEngine\Rasterizer.cpp(87,49): warning C4244: “参数”: 从“int”转换到“const float”，可能丢失数据
+D:\Code\ComputerGraphics\LitEngine\Rasterizer.cpp(87,46): warning C4244: “参数”: 从“int”转换到“const float”，可能丢失数据
+  LitEngine.vcxproj -> D:\Code\ComputerGraphics\LitEngine\x64\Debug\LitEngine.exe

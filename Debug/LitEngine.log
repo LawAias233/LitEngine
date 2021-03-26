@@ -1,0 +1,25 @@
+﻿  main.cpp
+D:\Code\ComputerGraphics\LitEngine\OBJ_Loader.h(654,43): warning C4018: “<”: 有符号/无符号不匹配
+D:\Code\ComputerGraphics\LitEngine\OBJ_Loader.h(691,31): warning C4018: “<”: 有符号/无符号不匹配
+D:\Code\ComputerGraphics\LitEngine\OBJ_Loader.h(697,35): warning C4018: “<”: 有符号/无符号不匹配
+D:\Code\ComputerGraphics\LitEngine\OBJ_Loader.h(951,33): warning C4244: “初始化”: 从“double”转换到“float”，可能丢失数据
+D:\Code\ComputerGraphics\LitEngine\main.cpp(25,21): warning C4018: “<”: 有符号/无符号不匹配
+D:\Code\ComputerGraphics\LitEngine\main.cpp(27,32): warning C4316: “Triangle”: 在堆上分配的对象可能不是对齐 16
+D:\Code\ComputerGraphics\LitEngine\main.cpp(62,35): warning C4244: “=”: 从“float”转换到“_Ty”，可能丢失数据
+          with
+          [
+              _Ty=unsigned char
+          ]
+D:\Code\ComputerGraphics\LitEngine\main.cpp(63,35): warning C4244: “=”: 从“float”转换到“_Ty”，可能丢失数据
+          with
+          [
+              _Ty=unsigned char
+          ]
+D:\Code\ComputerGraphics\LitEngine\main.cpp(64,35): warning C4244: “=”: 从“float”转换到“_Ty”，可能丢失数据
+          with
+          [
+              _Ty=unsigned char
+          ]
+  Triangle.cpp
+  正在生成代码...
+  LitEngine.vcxproj -> D:\Code\ComputerGraphics\LitEngine\Debug\LitEngine.exe
