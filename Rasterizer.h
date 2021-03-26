@@ -22,6 +22,8 @@ public:
 		return frame_buf; 
 	}
 
+	void rasterize(Triangle* te);
+
 	void rasterize(std::vector<Triangle*> triangleList);
 	void rasterize_triangle(Triangle&);
 

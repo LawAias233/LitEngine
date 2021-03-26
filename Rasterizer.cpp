@@ -23,15 +23,35 @@ static Eigen::Vector2f interpolate(float alpha, float beta, float gamma, const E
 	return Eigen::Vector2f(u, v);
 }
 
+void Rasterizer::rasterize(Triangle* te)
+{
+	float f1 = (50 - 0.1) / 2.0;
+	float f2 = (50 + 0.1) / 2.0;
+
+	Triangle t(*te);
+	Eigen::Vector4f v[3];
+	//1.进行MCP变换
+	v[0] = t.vertexs[0];
+	std::cout << v[0] << std::endl;
+	Eigen::Matrix4f mcp = projectionMatrix * cameraMatrix * modelMatrix;
+	//Eigen::Matrix4f mcp =cameraMatrix * modelMatrix;
+	//for (int i = 0; i < 3; ++i) v[i] = mcp * t.vertexs[i];
+	v[0] = mcp * t.vertexs[0];
+	std::cout << v[0] << std::endl;
+	
+}
+
 
 void Rasterizer::rasterize(std::vector<Triangle*>triangleList)
 {
+	float f1 = (50 - 0.1) / 2.0;
+	float f2 = (50 + 0.1) / 2.0;
 
 	for (const auto& te : triangleList)
 	{
 		Triangle t(*te);
 		Eigen::Vector4f v[3];
-		//1.进行MC变换
+		//1.进行MCP变换
 		Eigen::Matrix4f mcp =projectionMatrix * cameraMatrix * modelMatrix;
 		//Eigen::Matrix4f mcp =cameraMatrix * modelMatrix;
 		//Eigen::Matrix4f mcp =projectionMatrix * cameraMatrix * modelMatrix;
@@ -40,9 +60,14 @@ void Rasterizer::rasterize(std::vector<Triangle*>triangleList)
 		//2.透视除法
 		for (int i = 0; i < 3; ++i)
 		{
-			v[i].x() /= v[i].w();
-			v[i].y() /= v[i].w();
-			v[i].z() /= v[i].w();
+			//float b = v[i].w();
+			float a = 1/v[i].w();
+			v[i].x() *= a;
+			v[i].y() *= a;
+			v[i].z() *= a;
+			//v[i].x() /= v[i].w();
+			//v[i].y() /= v[i].w();
+			//v[i].z() /= v[i].w();
 		}
 		//3.法向量修正
 		//4.视口变换
@@ -50,7 +75,7 @@ void Rasterizer::rasterize(std::vector<Triangle*>triangleList)
 		{
 			v[i].x() = (v[i].x() + 1.0f) * width * 0.5f;
 			v[i].y() = (v[i].y() + 1.0f) * height * 0.5f;
-			v[i].z() = 50.0f * v[i].z() + 50.0f;//扩大差异
+			v[i].z() = f1 * v[i].z() + f2;//扩大差异
 			t.set_vertex(i, v[i]);
 		}
 		//5.渲染最终的三角形
