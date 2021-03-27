@@ -1,6 +1,7 @@
 #pragma once
 #include "Triangle.h"
 #include <vector>
+#include <array>
 #include <memory>
 #include <Eigen/Dense>
 
@@ -22,10 +23,10 @@ public:
 		return frame_buf; 
 	}
 
-	void rasterize(Triangle* te);
-
 	void rasterize(std::vector<Triangle*> triangleList);
-	void rasterize_triangle(Triangle&);
+	void rasterize_triangle(Triangle& ,const std::array<Eigen::Vector3f, 3>&);
+
+	Eigen::Vector3f phongShader(Eigen::Vector3f color, Eigen::Vector3f normal, Eigen::Vector3f pos);
 
 private:
 	int width, height;

@@ -51,9 +51,9 @@ int main()
 	//cout << get_cameraMatrix(Eigen::Vector3f(0.0f, 0.0f, 0.0f), Eigen::Vector3f(0.0f, 0.0f, -1.0f), Eigen::Vector3f(0.0f, 1.0f, 0.0f)) << endl;
 	//cout << get_projectionMatrix(45, 1.333, 0.1, 50) << endl;
 	//return 0;
-	r.set_model(get_modelMatrix(0));
-	r.set_camera(get_cameraMatrix(Eigen::Vector3f(0.0f,0.0f,0.0f), Eigen::Vector3f(0.0f,0.0f,-1.0f), Eigen::Vector3f(0.0f, 1.0f, 0.0f)));
-	r.set_projection(get_projectionMatrix(45,1.333,0.1,50));
+	r.set_model(get_modelMatrix(60));
+	r.set_camera(get_cameraMatrix(Eigen::Vector3f(0.0f,0.0f,-1.0f), Eigen::Vector3f(0.0f,0.0f,1.0f), Eigen::Vector3f(0.0f, 1.0f, 0.0f)));
+	r.set_projection(get_projectionMatrix(45,1.333,-0.1,-50));
 	//r.rasterize(triangleList[0]);
 	r.rasterize(triangleList);
 
@@ -81,7 +81,7 @@ Eigen::Matrix4f get_modelMatrix(float angle) //暂时只支持绕y轴旋转
 	translate << 
 		1.0f, 0.0f, 0.0f, 0.0f,
 		0.0f, 1.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 1.0f, 1.0f,
+		0.0f, 0.0f, 1.0f, 0.0f,
 		0.0f, 0.0f, 0.0f, 1.0f;
 
 	angle = angle * PI / 180;
@@ -92,9 +92,9 @@ Eigen::Matrix4f get_modelMatrix(float angle) //暂时只支持绕y轴旋转
 		0.0f, 0.0f, 0.0f, 1.0f;
 
 	scale <<
-		1.0f, 0.0f, 0.0f, 0.0f,
-		0.0f, 1.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 1.0f, 0.0f,
+		2.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 2.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 2.0f, 0.0f,
 		0.0f, 0.0f, 0.0f, 1.0f;
 
 	return translate* rotation * scale;
@@ -134,13 +134,13 @@ Eigen::Matrix4f get_projectionMatrix(float fov, float aspect_ratio, float zNear,
 	projectionMatrix << 
 		2*n/(r-l), 0.0f, 0.0f, 0.0f,
 		0.0f, 2*n/(t-b), 0.0f, 0.0f,
-		0.0f, 0.0f, (n+f)/(f-n), -2*n*f/(f-n),
+		0.0f, 0.0f, (n+f)/(n-f), -2*n*f/(n-f),
 		0.0f, 0.0f, 1.0f, 0.0f;
-
+	//return projectionMatrix;
 	orthographic <<
 		2.0f / (r - l), 0.0f, 0.0f, -(r + l) / (r - l),
 		0.0f, 2.0f / (t - b), 0.0f, -(t + b) / (t - b),
-		0.0f, 0.0f, 2.0f * (f - n), -(n + f) / (f - n),
+		0.0f, 0.0f, 2.0f / (n - f), -(n + f) / (n - f),
 		0.0f, 0.0f, 0.0f, 1.0f;
 	perspective <<
 		n, 0.0f, 0.0f, 0.0f,
