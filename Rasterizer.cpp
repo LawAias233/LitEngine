@@ -19,7 +19,6 @@ static Eigen::Vector2f interpolate(float alpha, float beta, float gamma, const E
 
 	u /= weight;
 	v /= weight;
-
 	return Eigen::Vector2f(u, v);
 }
 
@@ -75,6 +74,16 @@ void Rasterizer::rasterize(std::vector<Triangle*>triangleList)
 			//v[i].z() /= v[i].w();
 		}
 		//3.法向量修正
+		Eigen::Matrix4f inv_m = (cameraMatrix* modelMatrix).inverse().transpose();
+		Eigen::Vector4f n[3] = {
+			inv_m * Eigen::Vector4f(te->normals[0].x(), te->normals[0].y(),te->normals[0].z(), 0.0f),
+			inv_m * Eigen::Vector4f(te->normals[1].x(), te->normals[1].y(),te->normals[1].z(), 0.0f),
+			inv_m * Eigen::Vector4f(te->normals[2].x(), te->normals[2].y(),te->normals[2].z(), 0.0f),
+		};
+
+		for(int i = 0; i < 3; ++i)
+			t.set_normal(i, n[i].head<3>());
+
 		//4.视口变换
 		for (int i = 0; i < 3; ++i)
 		{
@@ -94,6 +103,7 @@ void Rasterizer::rasterize_triangle(Triangle& t, const std::array<Eigen::Vector3
 
 	auto& v = t.vertexs;
 	auto& c = t.colors;
+	auto& tex_c = t.tex_coords;
 	auto& n = t.normals;
 
 	//depth test optim
@@ -115,8 +125,10 @@ void Rasterizer::rasterize_triangle(Triangle& t, const std::array<Eigen::Vector3
 			{
 				float barycentric[3];//重心坐标
 				t.getBarycentricCoords3d(Eigen::Vector3f(j, i, 0.0f), barycentric);
+
 				int ind = i * width + j;
 				float weight = std::abs((barycentric[0]/v[0].w() + barycentric[1]/v[1].w() + barycentric[2]/v[2].w()));
+				//for (int i = 0; i < 3; i++) barycentric[i] /= v[i].z();
 				float depth = interpolate_f(barycentric[0], barycentric[1], barycentric[2], v[0].z(), v[1].z(), v[2].z(), weight);
 				depth *= weight;
 				if (depth_buf[ind] > depth)
@@ -125,13 +137,19 @@ void Rasterizer::rasterize_triangle(Triangle& t, const std::array<Eigen::Vector3
 					Eigen::Vector3f color = interpolate(barycentric[0], barycentric[1], barycentric[2], c[0], c[1], c[2], weight);
 
 					//法向量插值
-					Eigen::Vector3f normal = interpolate(barycentric[0], barycentric[1], barycentric[2], n[0], n[1], n[2], weight);
+					Eigen::Vector3f normal = interpolate(barycentric[0], barycentric[1], barycentric[2], n[0], n[1], n[2], weight).normalized();
 
 					//渲染位置插值
 					Eigen::Vector3f viewPos = interpolate(barycentric[0], barycentric[1], barycentric[2], objPos[0], objPos[1], objPos[2], weight);
 
+					//纹理坐标插值
+					Eigen::Vector2f texCoods = interpolate(barycentric[0], barycentric[1], barycentric[2], tex_c[0], tex_c[1], tex_c[2], weight);
+
+					fragment_shader_payload payload(viewPos, color, normal, texCoods, this->texture);
+
 					//frame_buf[ind] = color;
-					frame_buf[ind] = phongShader(color, normal, viewPos);
+					frame_buf[ind] = phongShader(payload, this->lights);
+					//frame_buf[ind] = textureShader(payload, this->lights);
 					depth_buf[ind] = depth;
 				}
 			}
@@ -139,61 +157,72 @@ void Rasterizer::rasterize_triangle(Triangle& t, const std::array<Eigen::Vector3
 	}
 }
 
-Eigen::Vector3f Rasterizer::phongShader(Eigen::Vector3f color, Eigen::Vector3f normal, Eigen::Vector3f pos)
+Eigen::Vector3f Rasterizer::phongShader(const fragment_shader_payload& payload, const std::vector<Light>& lights)
 {
+	Eigen::Vector3f ka(0.04f, 0.05f, 0.05f);
+	Eigen::Vector3f ks(0.9f, 0.9f, 0.9f);
+	Eigen::Vector3f kd = payload.color;
 
-	using namespace::Eigen;
+	Eigen::Vector3f Ia(1.0f, 1.0f, 1.0f);
 
-	normal = normal.normalized();
-
-	Vector3f ka(0.04f, 0.05f, 0.05f);
-	Vector3f ks(0.9f, 0.9f, 0.9f);
-	Vector3f& kd = color;
-
-	Vector3f Ia(1.4f, 1.4f, 1.4f);
-	Vector3f lightPos(2.0f, 2.0f, 2.0f);
-	Vector3f lightIntensity(7.5f, 7.5f, 7.5f);
-
-	Vector3f result_color(0.0f, 0.0f, 0.0f);
-
-	//result_color += ka * Ia; 这一步不能直接乘，3x1 和 3x1 的向量是不能乘的，需要做矩阵来传递
-	Matrix3f ka_m = Matrix3f::Identity();
+	Eigen::Vector3f result_color(0.0f, 0.0f, 0.0f);
+	Eigen::Matrix3f ka_m = Eigen::Matrix3f::Identity();
+	Eigen::Matrix3f kd_m = Eigen::Matrix3f::Identity();
+	Eigen::Matrix3f ks_m = Eigen::Matrix3f::Identity();
 	ka_m(0, 0) = ka.x();
 	ka_m(1, 1) = ka.y();
 	ka_m(2, 2) = ka.z();
-
-	//环境光
-	result_color += (Ia.transpose() * ka_m).transpose(); //((3x1)T 3x3)T = 3x1
-
-	Matrix3f kd_m = Matrix3f::Identity();
 	kd_m(0, 0) = kd.x();
 	kd_m(1, 1) = kd.y();
 	kd_m(2, 2) = kd.z();
-
-	//漫反射
-	Vector3f lightDir = lightPos - pos;
-	float cos_theat = normal.normalized().dot((lightPos - pos).normalized());
-	float distanceR = (lightPos - pos).norm();
-	Vector3f diffuse = 0.7 * kd_m * lightIntensity * std::max(0.0f, cos_theat) / (distanceR * distanceR);
-	result_color += diffuse;
-
-	//镜面反射
-	Matrix3f ks_m = Matrix3f::Identity();
 	ks_m(0, 0) = ks.x();
 	ks_m(1, 1) = ks.y();
 	ks_m(2, 2) = ks.z();
 
-	int P = 32;
-	Vector3f reflectDir = 2 * normal.dot(lightDir) * normal - lightDir;
-	cos_theat = lightDir.normalized().dot(reflectDir.normalized());
-	Vector3f reflectColor = ks_m * lightIntensity * std::pow(std::max(0.0f, cos_theat),P) / std::pow(distanceR, 2);
-	result_color += reflectColor;
+	//环境光
+	result_color += (Ia.transpose() * ka_m).transpose(); 
+
+	for (const auto& light : lights)
+	{
+		//漫反射
+		Eigen::Vector3f lightDir = (light.lightPos - payload.view_pos).normalized();
+		float cos_theat = payload.normal.dot(lightDir);
+		float distanceR = (light.lightPos - payload.view_pos).norm();
+		Eigen::Vector3f diffuse = kd_m * light.lightIntensity * std::max(0.0f, cos_theat) / std::pow(distanceR, 2);
+		result_color += diffuse;
+
+		//镜面反射
+		int P = 16;
+		Eigen::Vector3f reflectDir = 2 * payload.normal.dot(lightDir) * payload.normal - lightDir;
+		cos_theat = lightDir.normalized().dot(reflectDir.normalized());
+		Eigen::Vector3f reflectColor = ks_m * light.lightIntensity * std::pow(std::max(0.0f, cos_theat), P) / std::pow(distanceR, 2);
+		result_color += reflectColor;
+	}
 
 	result_color.x() = result_color.x() > 1.0f ? 1.0f : result_color.x();
 	result_color.y() = result_color.y() > 1.0f ? 1.0f : result_color.y();
 	result_color.z() = result_color.z() > 1.0f ? 1.0f : result_color.z();
 
 	return result_color;
+}
+
+Eigen::Vector3f getColorFromTexture(std::shared_ptr<Texture> texture_p, Eigen::Vector2f uv)
+{
+	float r, g, b;
+	int x = texture_p->w * uv.x();
+	int y = texture_p->h * uv.y();
+	int index = y * texture_p->w + x;
+	r = texture_p->data[index+0];
+	g = texture_p->data[index+1];
+	b = texture_p->data[index+2];
+	return Eigen::Vector3f(r,g,b);
+}
+
+Eigen::Vector3f Rasterizer::textureShader(const fragment_shader_payload& _payload, const std::vector<Light>& lights)
+{
+	fragment_shader_payload payload = _payload;
+	payload.color = getColorFromTexture(payload.texture, payload.texture_coords);
+	return phongShader(payload, this->lights);
 }
 
 void Rasterizer::set_camera(Eigen::Matrix4f c)
@@ -211,3 +240,7 @@ void Rasterizer::set_projection(Eigen::Matrix4f p )
 	projectionMatrix = p;
 }
 
+void Rasterizer::set_texture(std::shared_ptr<Texture> t)
+{
+	texture = t;
+}

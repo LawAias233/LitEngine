@@ -1,4 +1,4 @@
-#define STB_IMAGE_WRITE_IMPLEMENTATION 
+//#define TEST
 
 #include <iostream>
 #include <Eigen/Dense>
@@ -6,9 +6,11 @@
 #include <string>
 #include <algorithm>
 
-#include "Triangle.h"
 #include "Rasterizer.h"
+#define STB_IMAGE_WRITE_IMPLEMENTATION 
 #include "stb_image_write.h"
+
+//#include "stb_image.h"
 #include "OBJ_Loader.h"
 
 using namespace::std;
@@ -18,16 +20,19 @@ Eigen::Matrix4f get_cameraMatrix(Eigen::Vector3f viewpos, Eigen::Vector3f look_d
 Eigen::Matrix4f get_projectionMatrix(float fov, float aspect_ratio, float zNear, float zFar);
 
 const float PI = 3.1415926;
+#ifndef TEST
 
 int main()
 {
 	
 	const int width(800), height(600), cmp(3);
 	string filepath("out.png");
+	string texturepath("models/spot/hmap.jpg");
 	vector<Triangle*>triangleList;
 
+	std::shared_ptr<Texture>texture(new Texture(texturepath.c_str()));
 	objl::Loader loader;
-	bool loadout = loader.LoadFile("models/bunny/bunny.obj");
+	bool loadout = loader.LoadFile("models/spot/spot_triangulated_good.obj");
 	for (auto mesh : loader.LoadedMeshes)
 	{
 		for (int i = 0; i < mesh.Vertices.size(); i += 3)
@@ -38,12 +43,13 @@ int main()
 				t->set_vertex(j, Eigen::Vector4f(mesh.Vertices[i + j].Position.X, mesh.Vertices[i + j].Position.Y, mesh.Vertices[i + j].Position.Z, 1.0f));
 				t->set_normal(j, Eigen::Vector3f(mesh.Vertices[i + j].Normal.X, mesh.Vertices[i + j].Normal.Y, mesh.Vertices[i + j].Normal.Z));
 				t->set_texCoord(j, Eigen::Vector2f(mesh.Vertices[i + j].TextureCoordinate.X, mesh.Vertices[i + j].TextureCoordinate.Y));
-				t->set_color(j, 100.0f, 100.0f,100.0f);
+				t->set_color(j, 0x66, 0xCC, 0xFF);
 			}
 			triangleList.push_back(t);
 		}
 	}
 
+	
 	Rasterizer r(width, height);
 	unique_ptr<unsigned char[]>data(new unsigned char[width*height*cmp]);
 	
@@ -51,8 +57,9 @@ int main()
 	//cout << get_cameraMatrix(Eigen::Vector3f(0.0f, 0.0f, 0.0f), Eigen::Vector3f(0.0f, 0.0f, -1.0f), Eigen::Vector3f(0.0f, 1.0f, 0.0f)) << endl;
 	//cout << get_projectionMatrix(45, 1.333, 0.1, 50) << endl;
 	//return 0;
-	r.set_model(get_modelMatrix(60));
-	r.set_camera(get_cameraMatrix(Eigen::Vector3f(0.0f,0.0f,-1.0f), Eigen::Vector3f(0.0f,0.0f,1.0f), Eigen::Vector3f(0.0f, 1.0f, 0.0f)));
+	r.set_texture(texture);
+	r.set_model(get_modelMatrix(-90));
+	r.set_camera(get_cameraMatrix(Eigen::Vector3f(0.0f,0.0f,-2.5f), Eigen::Vector3f(0.0f,0.0f,1.0f), Eigen::Vector3f(0.0f, 1.0f, 0.0f)));
 	r.set_projection(get_projectionMatrix(45,1.333,-0.1,-50));
 	//r.rasterize(triangleList[0]);
 	r.rasterize(triangleList);
@@ -74,6 +81,8 @@ int main()
 	return 0;
 }
 
+#endif // !TEST
+
 Eigen::Matrix4f get_modelMatrix(float angle) //暂时只支持绕y轴旋转
 {
 	Eigen::Matrix4f translate, rotation, scale;
@@ -92,9 +101,9 @@ Eigen::Matrix4f get_modelMatrix(float angle) //暂时只支持绕y轴旋转
 		0.0f, 0.0f, 0.0f, 1.0f;
 
 	scale <<
-		2.0f, 0.0f, 0.0f, 0.0f,
-		0.0f, 2.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 2.0f, 0.0f,
+		1.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 1.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 1.0f, 0.0f,
 		0.0f, 0.0f, 0.0f, 1.0f;
 
 	return translate* rotation * scale;
@@ -150,3 +159,25 @@ Eigen::Matrix4f get_projectionMatrix(float fov, float aspect_ratio, float zNear,
 	return orthographic * perspective;
 	//return orthographic ;
 }
+#ifdef TEST
+
+int main()
+{
+	Texture t("models/spot/hmap.jpg");
+	int dataIndex(0);
+	for (int i = 0; i < t.h; i++)
+	{
+		for (int j = 0; j < t.w; j++)
+		{
+			t.data[dataIndex + 0] += 55.0f;
+			t.data[dataIndex + 1] += 55.0f;
+			t.data[dataIndex + 2] += 55.0f;
+			dataIndex += 3;
+		}
+	}
+
+	stbi_write_png("out2.png", t.w, t.h, t.n, t.data, t.w * t.n);
+
+	return 0;
+}
+#endif // TEST
