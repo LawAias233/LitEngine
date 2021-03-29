@@ -27,7 +27,8 @@ int main()
 	
 	const int width(800), height(600), cmp(3);
 	string filepath("out.png");
-	string texturepath("models/spot/hmap.jpg");
+	string texturepath("models/spot/spot_texture.png");
+	//string texturepath("models/spot/test_texture.png");
 	vector<Triangle*>triangleList;
 
 	std::shared_ptr<Texture>texture(new Texture(texturepath.c_str()));
@@ -58,8 +59,10 @@ int main()
 	//cout << get_projectionMatrix(45, 1.333, 0.1, 50) << endl;
 	//return 0;
 	r.set_texture(texture);
-	r.set_model(get_modelMatrix(-90));
-	r.set_camera(get_cameraMatrix(Eigen::Vector3f(0.0f,0.0f,-2.5f), Eigen::Vector3f(0.0f,0.0f,1.0f), Eigen::Vector3f(0.0f, 1.0f, 0.0f)));
+	r.set_model(get_modelMatrix(160));
+	Eigen::Vector3f cameraPos{ 0.0f,0.0f,-2.5f };
+	r.set_camera(get_cameraMatrix(cameraPos, Eigen::Vector3f(0.0f,0.0f,1.0f), Eigen::Vector3f(0.0f, 1.0f, 0.0f)),cameraPos);
+	//r.set_camera(get_cameraMatrix(Eigen::Vector3f(0.0f,0.0f,-2.5f), Eigen::Vector3f(0.0f,0.0f,1.0f), Eigen::Vector3f(0.0f, 1.0f, 0.0f)));
 	r.set_projection(get_projectionMatrix(45,1.333,-0.1,-50));
 	//r.rasterize(triangleList[0]);
 	r.rasterize(triangleList);
@@ -72,6 +75,9 @@ int main()
 		data.get()[dataIndex+0] = it.x()*255.99f;
 		data.get()[dataIndex+1] = it.y()*255.99f;
 		data.get()[dataIndex+2] = it.z()*255.99f;
+		//data.get()[dataIndex+0] = it.x();
+		//data.get()[dataIndex+1] = it.y();
+		//data.get()[dataIndex+2] = it.z();
 		dataIndex += cmp;
 	}
 
@@ -90,7 +96,7 @@ Eigen::Matrix4f get_modelMatrix(float angle) //暂时只支持绕y轴旋转
 	translate << 
 		1.0f, 0.0f, 0.0f, 0.0f,
 		0.0f, 1.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 1.0f, 0.0f,
+		0.0f, 0.0f, 1.0f, 0.5f,
 		0.0f, 0.0f, 0.0f, 1.0f;
 
 	angle = angle * PI / 180;
@@ -163,17 +169,40 @@ Eigen::Matrix4f get_projectionMatrix(float fov, float aspect_ratio, float zNear,
 
 int main()
 {
-	Texture t("models/spot/hmap.jpg");
+	Texture t("models/spot/spot_texture.png");
 	int dataIndex(0);
 	for (int i = 0; i < t.h; i++)
 	{
 		for (int j = 0; j < t.w; j++)
 		{
-			t.data[dataIndex + 0] += 55.0f;
-			t.data[dataIndex + 1] += 55.0f;
-			t.data[dataIndex + 2] += 55.0f;
+			if (i < t.h / 2 && j < t.w / 2)
+			{
+				t.data[dataIndex + 0] = 255.f;
+				t.data[dataIndex + 1] = 0.0f;
+				t.data[dataIndex + 2] = 0.0f;
+			}
+			else if (i > t.h/2 && j < t.w / 2)
+			{
+				t.data[dataIndex + 0] = 0.f;
+				t.data[dataIndex + 1] = 255.0f;
+				t.data[dataIndex + 2] = 0.0f;
+			}
+			else if (i < t.h / 2 && j > t.w / 2)
+			{
+				t.data[dataIndex + 0] = 0.f;
+				t.data[dataIndex + 1] = 0.0f;
+				t.data[dataIndex + 2] = 255.99f;
+			}
+			else
+			{
+				t.data[dataIndex + 0] = 255.99f;
+				t.data[dataIndex + 1] = 255.99f;
+				t.data[dataIndex + 2] = 255.99f;
+			}
+			
 			dataIndex += 3;
 		}
+
 	}
 
 	stbi_write_png("out2.png", t.w, t.h, t.n, t.data, t.w * t.n);

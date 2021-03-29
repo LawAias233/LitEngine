@@ -1,31 +1,21 @@
 ﻿cl : 命令行 warning D9002: 忽略未知选项“/arch:sse2”
-  Rasterizer.cpp
-D:\Code\ComputerGraphics\LitEngine\Rasterizer.cpp(31,29): warning C4305: “初始化”: 从“double”到“float”截断
-D:\Code\ComputerGraphics\LitEngine\Rasterizer.cpp(32,29): warning C4305: “初始化”: 从“double”到“float”截断
-D:\Code\ComputerGraphics\LitEngine\Rasterizer.cpp(111,56): warning C4244: “=”: 从“_Ty”转换到“int”，可能丢失数据
+  main.cpp
+D:\Code\ComputerGraphics\LitEngine\OBJ_Loader.h(951,33): warning C4244: “初始化”: 从“double”转换到“float”，可能丢失数据
+D:\Code\ComputerGraphics\LitEngine\main.cpp(22,27): warning C4305: “初始化”: 从“double”到“float”截断
+D:\Code\ComputerGraphics\LitEngine\main.cpp(66,57): warning C4305: “参数”: 从“double”到“float”截断
+D:\Code\ComputerGraphics\LitEngine\main.cpp(75,35): warning C4244: “=”: 从“float”转换到“_Ty”，可能丢失数据
           with
           [
-              _Ty=float
+              _Ty=unsigned char
           ]
-D:\Code\ComputerGraphics\LitEngine\Rasterizer.cpp(113,57): warning C4244: “=”: 从“_Ty”转换到“int”，可能丢失数据
+D:\Code\ComputerGraphics\LitEngine\main.cpp(76,35): warning C4244: “=”: 从“float”转换到“_Ty”，可能丢失数据
           with
           [
-              _Ty=float
+              _Ty=unsigned char
           ]
-D:\Code\ComputerGraphics\LitEngine\Rasterizer.cpp(115,56): warning C4244: “=”: 从“_Ty”转换到“int”，可能丢失数据
+D:\Code\ComputerGraphics\LitEngine\main.cpp(77,35): warning C4244: “=”: 从“float”转换到“_Ty”，可能丢失数据
           with
           [
-              _Ty=float
+              _Ty=unsigned char
           ]
-D:\Code\ComputerGraphics\LitEngine\Rasterizer.cpp(117,57): warning C4244: “=”: 从“_Ty”转换到“int”，可能丢失数据
-          with
-          [
-              _Ty=float
-          ]
-D:\Code\ComputerGraphics\LitEngine\Rasterizer.cpp(124,42): warning C4244: “参数”: 从“int”转换到“const float”，可能丢失数据
-D:\Code\ComputerGraphics\LitEngine\Rasterizer.cpp(124,39): warning C4244: “参数”: 从“int”转换到“const float”，可能丢失数据
-D:\Code\ComputerGraphics\LitEngine\Rasterizer.cpp(127,49): warning C4244: “参数”: 从“int”转换到“const float”，可能丢失数据
-D:\Code\ComputerGraphics\LitEngine\Rasterizer.cpp(127,46): warning C4244: “参数”: 从“int”转换到“const float”，可能丢失数据
-D:\Code\ComputerGraphics\LitEngine\Rasterizer.cpp(212,8): warning C4244: “初始化”: 从“float”转换到“int”，可能丢失数据
-D:\Code\ComputerGraphics\LitEngine\Rasterizer.cpp(213,8): warning C4244: “初始化”: 从“float”转换到“int”，可能丢失数据
-  LitEngine.vcxproj -> D:\Code\ComputerGraphics\LitEngine\x64\Debug\LitEngine.exe
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Microsoft\VC\v160\Microsoft.CppCommon.targets(1010,5): error MSB6006: “link.exe”已退出，代码为 1。

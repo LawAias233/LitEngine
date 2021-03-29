@@ -21,13 +21,13 @@ public:
 	{
 		frame_buf.resize(w*h);
 		depth_buf.resize(w*h,100000.0f);
-		lights.push_back({ {2.5f, 3.5f, 2.0f},{7.5, 7.5f, 7.5f} });
-		//lights.push_back({ {-0.5f, -0.5f, 0.0f},{7.0f, 7.0f, 7.0f} });
+		lights.push_back({ {-1.0f, 0.0f, 0.0f},{27.5, 27.5f, 27.5f} });
+		//lights.push_back({ {-0.5f, -0.5f, 10.0f},{7.0f, 7.0f, 7.0f} });
 	}
 
-	void set_camera(Eigen::Matrix4f);
-	void set_model(Eigen::Matrix4f);
-	void set_projection(Eigen::Matrix4f);
+	void set_camera(const Eigen::Matrix4f&, const Eigen::Vector3f&);
+	void set_model(const Eigen::Matrix4f&);
+	void set_projection(const Eigen::Matrix4f&);
 	void set_texture(std::shared_ptr<Texture>);
 
 	std::vector<Eigen::Vector3f>& get_frame_buf() 
@@ -47,6 +47,7 @@ private:
 	std::vector<Eigen::Vector3f> frame_buf; //÷°ª∫¥Ê
 	std::vector<float> depth_buf; //…Ó∂»ª∫¥Ê
 
+	Eigen::Vector3f cameraPos;
 	Eigen::Matrix4f modelMatrix;
 	Eigen::Matrix4f cameraMatrix;
 	Eigen::Matrix4f projectionMatrix;
